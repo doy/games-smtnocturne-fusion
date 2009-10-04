@@ -3,6 +3,11 @@ use Moose;
 use MooseX::ClassAttribute;
 use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types;
+use overload
+    '""' => sub {
+        my $self = shift;
+        '<' . $self->type . ' ' . $self->name . ' (' . $self->level . ')>'
+    };
 
 with 'MooseX::Traits',
      'MooseX::Role::Matcher' => { default_match => 'name' };
