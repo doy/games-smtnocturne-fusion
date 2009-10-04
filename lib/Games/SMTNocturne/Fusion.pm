@@ -1,5 +1,6 @@
 package Games::SMTNocturne::Fusion;
-use Moose;
+use Games::SMTNocturne::Fusion::Demon;
+use Games::SMTNocturne::Fusion::Chart;
 
 =head1 NAME
 
@@ -13,8 +14,6 @@ Games::SMTNocturne::Fusion -
 
 =cut
 
-__PACKAGE__->meta->make_immutable;
-no Moose;
 
 =head1 BUGS
 
