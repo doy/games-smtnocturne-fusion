@@ -1,9 +1,10 @@
 package Games::SMTNocturne::Fusion::Chart;
 use Moose;
+use MooseX::ClassAttribute;
 use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types;
 
-has _type_chart => (
+class_has _type_chart => (
     is      => 'ro',
     isa     => 'HashRef[HashRef[Maybe[Games::SMTNocturne::Fusion::DemonType]]]',
     lazy    => 1,
