@@ -3,6 +3,7 @@ use Moose;
 use MooseX::ClassAttribute;
 use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types;
+use constant Demon => 'Games::SMTNocturne::Fusion::Demon';
 
 class_has _type_chart => (
     is      => 'ro',
@@ -19,13 +20,11 @@ class_has _type_chart => (
 sub fuse {
     my $self = shift;
     my ($demon1, $demon2) = @_;
-    $demon1 = Games::SMTNocturne::Fusion::Demon->lookup($demon1)
-        unless blessed($demon1);
-    $demon2 = Games::SMTNocturne::Fusion::Demon->lookup($demon2)
-        unless blessed($demon2);
+    $demon1 = Demon->lookup($demon1) unless blessed($demon1);
+    $demon2 = Demon->lookup($demon2) unless blessed($demon2);
     my $type = $self->_type_chart->{$demon1->type}{$demon2->type};
     my $level = ($demon1->level + $demon2->level) / 2;
-    my @possible = Games::SMTNocturne::Fusion::Demon->lookup(
+    my @possible = Demon->lookup(
         type  => $type,
         level => sub { $_ >= $level },
     );
@@ -35,13 +34,13 @@ sub fuse {
 sub fusions_for {
     my $self = shift;
     my ($demon) = @_;
-    $demon = Games::SMTNocturne::Fusion::Demon->lookup($demon)
-        unless blessed($demon);
+    $demon = Demon->lookup($demon) unless blessed($demon);
 
     my $type = $demon->type;
     my @type_combos;
     for my $type1 (keys %{ $self->_type_chart }) {
-        for my $type2 (grep { defined } keys %{ $self->_type_chart->{$type1} } ) {
+        for my $type2 (grep { defined }
+                            keys %{ $self->_type_chart->{$type1} }) {
             my $fusion_type = $self->_type_chart->{$type1}{$type2};
             push @type_combos, [$type1, $type2]
                 if defined $fusion_type && $type eq $fusion_type;
@@ -50,12 +49,8 @@ sub fusions_for {
 
     my @found;
     for my $combo (@type_combos) {
-        my @type1_demons = Games::SMTNocturne::Fusion::Demon->lookup(
-            type => $combo->[0],
-        );
-        my @type2_demons = Games::SMTNocturne::Fusion::Demon->lookup(
-            type => $combo->[1],
-        );
+        my @type1_demons = Demon->lookup(type => $combo->[0]);
+        my @type2_demons = Demon->lookup(type => $combo->[1]);
         for my $demon1 (@type1_demons) {
             for my $demon2 (@type2_demons) {
                 my $fusion = $self->fuse($demon1, $demon2);
