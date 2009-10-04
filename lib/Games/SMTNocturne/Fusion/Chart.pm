@@ -16,6 +16,22 @@ class_has _type_chart => (
     },
 );
 
+sub fuse {
+    my $self = shift;
+    my ($demon1, $demon2) = @_;
+    $demon1 = Games::SMTNocturne::Fusion::Demon->lookup($demon1)
+        unless blessed($demon1);
+    $demon2 = Games::SMTNocturne::Fusion::Demon->lookup($demon2)
+        unless blessed($demon2);
+    my $type = $self->_type_chart->{$demon1->type}{$demon2->type};
+    my $level = ($demon1->level + $demon2->level) / 2;
+    my @possible = Games::SMTNocturne::Fusion::Demon->lookup(
+        type  => $type,
+        level => sub { $_ >= $level },
+    );
+    return $possible[0];
+}
+
 1;
 
 __DATA__
