@@ -32,6 +32,42 @@ sub fuse {
     return $possible[0];
 }
 
+sub fusions_for {
+    my $self = shift;
+    my ($demon) = @_;
+    $demon = Games::SMTNocturne::Fusion::Demon->lookup($demon)
+        unless blessed($demon);
+
+    my $type = $demon->type;
+    my @type_combos;
+    for my $type1 (keys %{ $self->_type_chart }) {
+        for my $type2 (grep { defined } keys %{ $self->_type_chart->{$type1} } ) {
+            my $fusion_type = $self->_type_chart->{$type1}{$type2};
+            push @type_combos, [$type1, $type2]
+                if defined $fusion_type && $type eq $fusion_type;
+        }
+    }
+
+    my @found;
+    for my $combo (@type_combos) {
+        my @type1_demons = Games::SMTNocturne::Fusion::Demon->lookup(
+            type => $combo->[0],
+        );
+        my @type2_demons = Games::SMTNocturne::Fusion::Demon->lookup(
+            type => $combo->[1],
+        );
+        for my $demon1 (@type1_demons) {
+            for my $demon2 (@type2_demons) {
+                my $fusion = $self->fuse($demon1, $demon2);
+                push @found, [$demon1, $demon2]
+                    if defined $fusion && $fusion->name eq $demon->name;
+            }
+        }
+    }
+
+    return @found;
+}
+
 1;
 
 __DATA__
