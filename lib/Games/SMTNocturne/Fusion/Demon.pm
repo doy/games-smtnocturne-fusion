@@ -1,15 +1,17 @@
 package Games::SMTNocturne::Fusion::Demon;
 use Moose;
+use Moose::Util::TypeConstraints;
 use MooseX::ClassAttribute;
-use MooseX::Types::Moose qw(ArrayRef HashRef Int Str);
+use MooseX::Types::Moose qw(ArrayRef HashRef Int Maybe Str);
 use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types qw(DemonType FusionType SMTDemon);
-use overload
-    '""' => sub {
-        my $self = shift;
-        '<' . $self->type . ' ' . $self->name . ' (' . $self->level . ')>'
-    };
-use namespace::autoclean;
+# XXX ick ick ick (n::ac breaks overload)
+use namespace::clean -except => 'meta';
+use overload '""' => sub {
+    my $self = shift;
+    '<' . $self->type . ' ' . $self->name . ' (' . $self->level . ')>'
+};
+# use namespace::autoclean;
 
 with 'MooseX::Traits',
      'MooseX::Role::Matcher' => { default_match => 'name' };
@@ -38,7 +40,12 @@ class_has list => (
         } qw(deathstone evolve special);
         $traits{normal} = [];
         return [ map {
-            $class->new_with_traits(traits => $traits{$_->{fusion_type}}, %$_)
+            my $demon_class = "Games::SMTNocturne::Fusion::Demon::$_->{type}";
+            Class::MOP::load_class($demon_class);
+            $demon_class->new_with_traits(
+                traits => $traits{$_->{fusion_type}},
+                %$_,
+            );
         } @{ $class->_list } ];
     },
 );
@@ -65,6 +72,24 @@ has fusion_type => (
     is       => 'ro',
     isa      => FusionType,
     required => 1,
+);
+
+has elemental_fusions => (
+    traits   => ['Hash'],
+    is       => 'ro',
+    isa      => HashRef[Maybe[enum[qw(up down)]]],
+    init_arg => undef,
+    default  => sub { { } },
+    handles  => {
+        elemental_fusion_direction => 'get',
+    },
+);
+
+has self_fusion_element => (
+    is       => 'ro',
+    isa      => Maybe[enum[qw(Erthys Aeros Aquans Flameis)]],
+    init_arg => undef,
+    default  => undef,
 );
 
 sub lookup {

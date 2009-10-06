@@ -22,7 +22,8 @@ coerce DemonList, from ArrayRef[Str],
 
 for my $typename (@demon_types) {
     my $type = __PACKAGE__->can($typename)->();
-    subtype $type, as SMTDemon, where { $_->type eq $typename };
+    class_type $type,
+        { class => "Games::SMTNocturne::Fusion::Demon::$typename" };
     coerce $type, from Str,
         via { Games::SMTNocturne::Fusion::Demon->lookup($_) };
 }
