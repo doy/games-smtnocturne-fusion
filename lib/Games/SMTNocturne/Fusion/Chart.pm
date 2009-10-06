@@ -63,8 +63,31 @@ multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
 
 multi method fuse (ClassName $self: Element $demon1 is coerce,
                                     Element $demon2 is coerce) {
-    # XXX: fix
-    return;
+    my %element_fusions = (
+        Erthys => {
+            Aeros   => 'Nigi',
+            Aquans  => 'Ara',
+            Flameis => 'Kusi',
+        },
+        Aeros => {
+            Erthys  => 'Nigi',
+            Aquans  => 'Kusi',
+            Flameis => 'Ara',
+        },
+        Aquans => {
+            Erthys  => 'Ara',
+            Aeros   => 'Kusi',
+            Flameis => 'Saki',
+        },
+        Flameis => {
+            Erthys  => 'Kusi',
+            Aeros   => 'Ara',
+            Aquans  => 'Saki',
+        },
+    );
+    my $mitama = $element_fusions{$demon1->name}{$demon2->name};
+    return unless $mitama;
+    return Demon->lookup("$mitama Mitama");
 }
 
 multi method fuse (ClassName $self: Mitama $demon1 is coerce,
