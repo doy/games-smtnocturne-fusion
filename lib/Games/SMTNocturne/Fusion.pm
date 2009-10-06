@@ -1,6 +1,14 @@
 package Games::SMTNocturne::Fusion;
 use Games::SMTNocturne::Fusion::Demon;
 use Games::SMTNocturne::Fusion::Chart;
+use Sub::Exporter -setup => {
+    exports => [
+        qw(fuse fusions_for lookup_demon),
+    ],
+    groups => {
+        default => [qw(fuse fusions_for lookup_demon)],
+    },
+};
 
 =head1 NAME
 
@@ -14,6 +22,17 @@ Games::SMTNocturne::Fusion -
 
 =cut
 
+sub fuse {
+    return Games::SMTNocturne::Fusion::Chart->fuse(@_);
+}
+
+sub fusions_for {
+    return Games::SMTNocturne::Fusion::Chart->fusions_for(@_);
+}
+
+sub lookup_demon {
+    return Games::SMTNocturne::Fusion::Demon->lookup(@_);
+}
 
 =head1 BUGS
 
