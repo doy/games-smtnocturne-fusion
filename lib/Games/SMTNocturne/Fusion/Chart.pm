@@ -49,16 +49,10 @@ my %element_fusions = (
 
 multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
                                     SMTDemon $demon2 is coerce) {
-    my $type = $self->_type_chart->{$demon1->type}{$demon2->type};
-    my $level = ($demon1->level + $demon2->level) / 2;
-    my @possible = Demon->lookup(
-        type  => $type,
-        level => sub { $_ >= $level },
+    return Demon->next_demon_above_level(
+        $self->_type_chart->{$demon1->type}{$demon2->type},
+        ($demon1->level + $demon2->level) / 2,
     );
-    return firstval { !$_->does('Games::SMTNocturne::Fusion::Role::Deathstone')
-                   && !$_->does('Games::SMTNocturne::Fusion::Role::Evolve')
-                   && !$_->does('Games::SMTNocturne::Fusion::Role::Special') }
-                    @possible;
 }
 
 multi method fuse (ClassName $self: Element $demon1 is coerce,

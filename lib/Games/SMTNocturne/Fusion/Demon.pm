@@ -112,28 +112,44 @@ sub lookup {
     return wantarray ? @possible : (@possible == 1 ? $possible[0] : undef);
 }
 
+sub fusion_possibility {
+    my $self = shift;
+    return
+        if $self->does('Games::SMTNocturne::Fusion::Role::NotNormallyFusable');
+    # XXX: should have a way to specify which bosses we've beaten so far
+    return
+        if $self->does('Games::SMTNocturne::Fusion::Role::Boss');
+    return 1;
+}
+
+sub next_demon_above_level {
+    my $class = shift;
+    my ($type, $level) = @_;
+    my @possible = $class->lookup(
+        type  => $type,
+        level => sub { $_ >= $level },
+    );
+    return firstval { $_->fusion_possibility } @possible;
+}
+
+sub next_demon_below_level {
+    my $class = shift;
+    my ($type, $level) = @_;
+    my @possible = $class->lookup(
+        type  => $type,
+        level => sub { $_ <= $level },
+    );
+    return lastval { $_->fusion_possibility } @possible;
+}
+
 sub level_up {
     my $self = shift;
-    my @possible = $self->lookup(
-        type  => $self->type,
-        level => sub { $_ > $self->level },
-    );
-    return firstval { !$_->does('Games::SMTNocturne::Fusion::Role::Deathstone')
-                   && !$_->does('Games::SMTNocturne::Fusion::Role::Evolve')
-                   && !$_->does('Games::SMTNocturne::Fusion::Role::Special') }
-                    @possible;
+    return $self->next_demon_above_level($self->type, $self->level + 1);
 }
 
 sub level_down {
     my $self = shift;
-    my @possible = $self->lookup(
-        type  => $self->type,
-        level => sub { $_ < $self->level },
-    );
-    return lastval { !$_->does('Games::SMTNocturne::Fusion::Role::Deathstone')
-                  && !$_->does('Games::SMTNocturne::Fusion::Role::Evolve')
-                  && !$_->does('Games::SMTNocturne::Fusion::Role::Special') }
-                   @possible;
+    return $self->next_demon_below_level($self->type, $self->level - 1);
 }
 
 __PACKAGE__->meta->make_immutable;
