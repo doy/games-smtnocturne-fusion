@@ -1,6 +1,7 @@
 package Games::SMTNocturne::Fusion::Chart;
 use Moose;
 use MooseX::ClassAttribute;
+use MooseX::Mangle;
 use MooseX::MultiMethods;
 use List::MoreUtils qw(firstval);
 use YAML::Any qw(Load);
@@ -118,7 +119,6 @@ multi method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
         my @type2_demons = Demon->lookup(type => $combo->[1]);
         for my $demon1 (@type1_demons) {
             for my $demon2 (@type2_demons) {
-                next if $demon2->level < $demon1->level;
                 my $fusion = $self->fuse($demon1, $demon2);
                 push @found, [$demon1, $demon2]
                     if defined $fusion && $fusion->name eq $demon->name;
@@ -149,7 +149,6 @@ multi method fusions_for (ClassName $self: Element $demon is coerce) {
     for my $demon1 (@demons) {
         for my $demon2 (grep { $demon1->type eq $_->type } @demons) {
             next if $demon1->name eq $demon2->name;
-            next if $demon2->level < $demon1->level;
             push @found, [$demon1, $demon2];
         }
     }
@@ -162,12 +161,17 @@ multi method fusions_for (ClassName $self: Mitama $demon is coerce) {
         for my $demon2 (keys %{ $element_fusions{$demon1} }) {
             next unless $demon->name eq "$element_fusions{$demon1}{$demon2} Mitama";
             my ($found1, $found2) = (Demon->lookup($demon1), Demon->lookup($demon2));
-            next if $found2->level < $found1->level;
             push @found, [$found1, $found2];
         }
     }
     return @found;
 }
+
+mangle_return fusions_for => sub {
+    my $self = shift;
+    @_ = grep { $_->[0]->level <= $_->[1]->level } @_;
+    return @_;
+};
 
 __PACKAGE__->meta->make_immutable;
 
