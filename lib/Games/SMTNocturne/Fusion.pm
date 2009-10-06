@@ -1,6 +1,8 @@
 package Games::SMTNocturne::Fusion;
 use Games::SMTNocturne::Fusion::Demon;
 use Games::SMTNocturne::Fusion::Chart;
+use Games::SMTNocturne::Fusion::Deathstone;
+use Games::SMTNocturne::Fusion::KagutsuchiPhase;
 use Sub::Exporter -setup => {
     exports => [
         qw(fuse fusions_for lookup_demon
