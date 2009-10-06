@@ -99,6 +99,24 @@ sub lookup {
     return wantarray ? @possible : (@possible == 1 ? $possible[0] : undef);
 }
 
+sub level_up {
+    my $self = shift;
+    my @possible = $self->lookup(
+        type  => $self->type,
+        level => sub { $_ > $self->level },
+    );
+    return $possible[0];
+}
+
+sub level_down {
+    my $self = shift;
+    my @possible = $self->lookup(
+        type  => $self->type,
+        level => sub { $_ < $self->level },
+    );
+    return $possible[$#possible];
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;

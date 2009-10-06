@@ -33,8 +33,15 @@ multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
 
 multi method fuse (ClassName $self: Element $demon1 is coerce,
                                     SMTDemon $demon2 is coerce) {
-    # XXX: fix
-    return;
+    my $direction = $demon2->elemental_fusion_direction($demon1->name);
+    return unless defined $direction;
+
+    if ($direction eq 'down') {
+        return $demon2->level_down;
+    }
+    else {
+        return $demon2->level_up;
+    }
 }
 
 multi method fuse (ClassName $self: Mitama $demon1 is coerce,
