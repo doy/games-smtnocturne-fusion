@@ -133,8 +133,10 @@ multi method fusions_for (ClassName $class: EvolveDemon $demon is coerce) {
 }
 
 multi method fusions_for (ClassName $class: DeathstoneDemon $demon is coerce) {
-    # XXX: fix
-    return;
+    my @demons = Demon->lookup(type => $demon->required_target_type);
+    return map { [@$_, Games::SMTNocturne::Fusion::Deathstone->new] }
+           map { $class->fusions_for($_) }
+           @demons;
 }
 
 multi method fusions_for (ClassName $class: Element $demon is coerce) {
