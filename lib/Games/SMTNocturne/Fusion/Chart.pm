@@ -3,7 +3,7 @@ use Moose;
 use MooseX::ClassAttribute;
 use MooseX::MultiMethods;
 use YAML::Any qw(Load);
-use Games::SMTNocturne::Fusion::Types qw(DemonType SMTDemon);
+use Games::SMTNocturne::Fusion::Types qw(DemonType SMTDemon Element Mitama);
 use MooseX::Types::Moose qw(HashRef Maybe);
 use constant Demon => 'Games::SMTNocturne::Fusion::Demon';
 
@@ -28,6 +28,38 @@ multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
         level => sub { $_ >= $level },
     );
     return $possible[0];
+}
+
+multi method fuse (ClassName $self: Element $demon1 is coerce,
+                                    SMTDemon $demon2 is coerce) {
+    # XXX: fix
+    return;
+}
+
+multi method fuse (ClassName $self: Mitama $demon1 is coerce,
+                                    SMTDemon $demon2 is coerce) {
+    return $demon2;
+}
+
+multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
+                                    Element $demon2 is coerce) {
+    return $self->fuse($demon2, $demon1);
+}
+
+multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
+                                    Mitama $demon2 is coerce) {
+    return $self->fuse($demon2, $demon1);
+}
+
+multi method fuse (ClassName $self: Element $demon1 is coerce,
+                                    Element $demon2 is coerce) {
+    # XXX: fix
+    return;
+}
+
+multi method fuse (ClassName $self: Mitama $demon1 is coerce,
+                                    Mitama $demon2 is coerce) {
+    return;
 }
 
 method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
