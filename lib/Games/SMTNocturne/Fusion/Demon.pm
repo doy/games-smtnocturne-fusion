@@ -3,6 +3,7 @@ use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::ClassAttribute;
 use MooseX::Types::Moose qw(ArrayRef HashRef Int Maybe Str);
+use List::MoreUtils qw(firstval lastval);
 use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types qw(DemonType FusionType SMTDemon);
 # XXX ick ick ick (n::ac breaks overload)
@@ -105,7 +106,10 @@ sub level_up {
         type  => $self->type,
         level => sub { $_ > $self->level },
     );
-    return $possible[0];
+    return firstval { !$_->does('Games::SMTNocturne::Fusion::Role::Deathstone')
+                   && !$_->does('Games::SMTNocturne::Fusion::Role::Evolve')
+                   && !$_->does('Games::SMTNocturne::Fusion::Role::Special') }
+                    @possible;
 }
 
 sub level_down {
@@ -114,7 +118,10 @@ sub level_down {
         type  => $self->type,
         level => sub { $_ < $self->level },
     );
-    return $possible[$#possible];
+    return lastval { !$_->does('Games::SMTNocturne::Fusion::Role::Deathstone')
+                  && !$_->does('Games::SMTNocturne::Fusion::Role::Evolve')
+                  && !$_->does('Games::SMTNocturne::Fusion::Role::Special') }
+                   @possible;
 }
 
 __PACKAGE__->meta->make_immutable;

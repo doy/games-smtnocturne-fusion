@@ -2,6 +2,7 @@ package Games::SMTNocturne::Fusion::Chart;
 use Moose;
 use MooseX::ClassAttribute;
 use MooseX::MultiMethods;
+use List::MoreUtils qw(firstval);
 use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types
     qw(DemonType SMTDemon Element Mitama
@@ -53,7 +54,10 @@ multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
         type  => $type,
         level => sub { $_ >= $level },
     );
-    return $possible[0];
+    return firstval { !$_->does('Games::SMTNocturne::Fusion::Role::Deathstone')
+                   && !$_->does('Games::SMTNocturne::Fusion::Role::Evolve')
+                   && !$_->does('Games::SMTNocturne::Fusion::Role::Special') }
+                    @possible;
 }
 
 multi method fuse (ClassName $self: Element $demon1 is coerce,
