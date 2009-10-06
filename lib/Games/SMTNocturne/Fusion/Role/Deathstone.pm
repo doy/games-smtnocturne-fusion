@@ -1,6 +1,5 @@
 package Games::SMTNocturne::Fusion::Role::Deathstone;
 use Moose::Role;
-
-no Moose::Role;
+use namespace::autoclean;
 
 1;

@@ -1,6 +1,5 @@
 package Games::SMTNocturne::Fusion::Role::Evolve;
 use Moose::Role;
-
-no Moose::Role;
+use namespace::autoclean;
 
 1;

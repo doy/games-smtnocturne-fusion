@@ -6,6 +6,7 @@ use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types qw(DemonType SMTDemon Element Mitama);
 use MooseX::Types::Moose qw(HashRef Maybe);
 use constant Demon => 'Games::SMTNocturne::Fusion::Demon';
+use namespace::autoclean;
 
 class_has _type_chart => (
     is      => 'ro',
@@ -89,6 +90,8 @@ method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
 
     return @found;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

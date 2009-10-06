@@ -9,6 +9,7 @@ use overload
         my $self = shift;
         '<' . $self->type . ' ' . $self->name . ' (' . $self->level . ')>'
     };
+use namespace::autoclean;
 
 with 'MooseX::Traits',
      'MooseX::Role::Matcher' => { default_match => 'name' };
@@ -74,7 +75,6 @@ sub lookup {
 }
 
 __PACKAGE__->meta->make_immutable;
-no Moose;
 
 1;
 
