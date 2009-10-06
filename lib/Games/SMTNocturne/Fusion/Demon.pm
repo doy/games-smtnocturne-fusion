@@ -3,7 +3,7 @@ use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::ClassAttribute;
 use MooseX::Types::Moose qw(ArrayRef HashRef Int Maybe Str);
-use List::MoreUtils qw(firstval lastval);
+use List::MoreUtils qw(any firstval lastval);
 use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types qw(DemonType FusionType SMTDemon);
 # XXX ick ick ick (n::ac breaks overload)
@@ -16,6 +16,14 @@ use overload '""' => sub {
 
 with 'MooseX::Traits',
      'MooseX::Role::Matcher' => { default_match => 'name' };
+
+my @bosses = (qw(Forneus Specter Troll Matador Orthrus Yaksini Thor Daisoujou
+                 Eligor Berith Kaiwan Ose Mizuchi Sui-Ki Kin-Ki Fuu-Ki Ongyo-Ki
+                 Clotho Lachesis Atropos Girimehkala Sakahagi Aciel Skadi
+                 Gabriel Uriel Raphael Futomimi Trumpeter Surt Mot Mithra
+                 Samael Flauros Beelzebub Metatron),
+                 'Hell Biker', 'White Rider', 'Red Rider', 'Black Rider',
+                 'Pale Rider', 'The Harlot', 'Black Frost', 'Beelzebub (Fly)');
 
 class_has _list => (
     is      => 'ro',
@@ -43,8 +51,12 @@ class_has list => (
         return [ map {
             my $demon_class = "Games::SMTNocturne::Fusion::Demon::$_->{type}";
             Class::MOP::load_class($demon_class);
+            my $traits = [@{ $traits{$_->{fusion_type}} }];
+            my $name = $_->{name};
+            push @$traits, 'Games::SMTNocturne::Fusion::Role::Boss'
+                if any { $_ eq $name } @bosses;
             $demon_class->new_with_traits(
-                traits => $traits{$_->{fusion_type}},
+                traits => $traits,
                 %$_,
             );
         } @{ $class->_list } ];
