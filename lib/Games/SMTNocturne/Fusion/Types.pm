@@ -7,7 +7,9 @@ BEGIN {
            Foul Seraph Wargod Genma Dragon Avatar Avian Raptor Entity Fiend);
 }
 use MooseX::Types
-    -declare => [qw(DemonType FusionType SMTDemon DemonList), @demon_types];
+    -declare => [qw(DemonType FusionType SMTDemon DemonList
+                    DeathstoneDemon EvolveDemon SpecialDemon),
+                 @demon_types];
 use MooseX::Types::Moose qw(ArrayRef Str);
 
 enum DemonType, @demon_types;
@@ -24,6 +26,14 @@ for my $typename (@demon_types) {
     my $type = __PACKAGE__->can($typename)->();
     class_type $type,
         { class => "Games::SMTNocturne::Fusion::Demon::$typename" };
+    coerce $type, from Str,
+        via { Games::SMTNocturne::Fusion::Demon->lookup($_) };
+}
+
+for my $typename (qw(Deathstone Evolve Special)) {
+    my $type = __PACKAGE__->can("${typename}Demon")->();
+    subtype $type, as SMTDemon,
+        where { $_->does("Games::SMTNocturne::Fusion::Role::$typename") };
     coerce $type, from Str,
         via { Games::SMTNocturne::Fusion::Demon->lookup($_) };
 }

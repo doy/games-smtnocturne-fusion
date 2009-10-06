@@ -3,7 +3,9 @@ use Moose;
 use MooseX::ClassAttribute;
 use MooseX::MultiMethods;
 use YAML::Any qw(Load);
-use Games::SMTNocturne::Fusion::Types qw(DemonType SMTDemon Element Mitama);
+use Games::SMTNocturne::Fusion::Types
+    qw(DemonType SMTDemon Element Mitama
+       DeathstoneDemon EvolveDemon SpecialDemon);
 use MooseX::Types::Moose qw(HashRef Maybe);
 use constant Demon => 'Games::SMTNocturne::Fusion::Demon';
 use namespace::autoclean;
@@ -70,7 +72,7 @@ multi method fuse (ClassName $self: Mitama $demon1 is coerce,
     return;
 }
 
-method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
+multi method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
     my $type = $demon->type;
     my @type_combos;
     for my $type1 (keys %{ $self->_type_chart }) {
@@ -97,6 +99,20 @@ method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
     }
 
     return @found;
+}
+
+multi method fusions_for (ClassName $self: SpecialDemon $demon is coerce) {
+    # XXX: fix
+    return;
+}
+
+multi method fusions_for (ClassName $self: EvolveDemon $demon is coerce) {
+    return;
+}
+
+multi method fusions_for (ClassName $self: DeathstoneDemon $demon is coerce) {
+    # XXX: fix
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;
