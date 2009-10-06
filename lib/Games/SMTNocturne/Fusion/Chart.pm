@@ -81,6 +81,16 @@ multi method fuse (ClassName $class: Mitama $demon1 is coerce,
     return $demon2;
 }
 
+multi method fuse (ClassName $class: Mitama $demon1 is coerce,
+                                     Element $demon2 is coerce) {
+    return $demon2;
+}
+
+multi method fuse (ClassName $class: Element $demon1 is coerce,
+                                     Mitama $demon2 is coerce) {
+    return $class->fuse($demon2, $demon1);
+}
+
 multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
                                      Element $demon2 is coerce) {
     return $class->fuse($demon2, $demon1);
@@ -145,30 +155,6 @@ multi method fusions_for (ClassName $class: DeathstoneDemon $demon is coerce) {
     return map { [@$_, Games::SMTNocturne::Fusion::Deathstone->new] }
            map { $class->fusions_for($_) }
            @demons;
-}
-
-multi method fusions_for (ClassName $class: Element $demon is coerce) {
-    my @demons = Demon->lookup(self_fusion_element => $demon->name);
-    my @found;
-    for my $demon1 (@demons) {
-        for my $demon2 (grep { $demon1->type eq $_->type } @demons) {
-            next if $demon1->name eq $demon2->name;
-            push @found, [$demon1, $demon2];
-        }
-    }
-    return @found;
-}
-
-multi method fusions_for (ClassName $class: Mitama $demon is coerce) {
-    my @found;
-    for my $demon1 (keys %element_fusions) {
-        for my $demon2 (keys %{ $element_fusions{$demon1} }) {
-            next unless $demon->name eq "$element_fusions{$demon1}{$demon2} Mitama";
-            my ($found1, $found2) = (Demon->lookup($demon1), Demon->lookup($demon2));
-            push @found, [$found1, $found2];
-        }
-    }
-    return @found;
 }
 
 mangle_return fusions_for => sub {
