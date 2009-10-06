@@ -22,6 +22,29 @@ class_has _type_chart => (
     },
 );
 
+my %element_fusions = (
+    Erthys => {
+        Aeros   => 'Nigi',
+        Aquans  => 'Ara',
+        Flameis => 'Kusi',
+    },
+    Aeros => {
+        Erthys  => 'Nigi',
+        Aquans  => 'Kusi',
+        Flameis => 'Ara',
+    },
+    Aquans => {
+        Erthys  => 'Ara',
+        Aeros   => 'Kusi',
+        Flameis => 'Saki',
+    },
+    Flameis => {
+        Erthys  => 'Kusi',
+        Aeros   => 'Ara',
+        Aquans  => 'Saki',
+    },
+);
+
 multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
                                     SMTDemon $demon2 is coerce) {
     my $type = $self->_type_chart->{$demon1->type}{$demon2->type};
@@ -63,28 +86,6 @@ multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
 
 multi method fuse (ClassName $self: Element $demon1 is coerce,
                                     Element $demon2 is coerce) {
-    my %element_fusions = (
-        Erthys => {
-            Aeros   => 'Nigi',
-            Aquans  => 'Ara',
-            Flameis => 'Kusi',
-        },
-        Aeros => {
-            Erthys  => 'Nigi',
-            Aquans  => 'Kusi',
-            Flameis => 'Ara',
-        },
-        Aquans => {
-            Erthys  => 'Ara',
-            Aeros   => 'Kusi',
-            Flameis => 'Saki',
-        },
-        Flameis => {
-            Erthys  => 'Kusi',
-            Aeros   => 'Ara',
-            Aquans  => 'Saki',
-        },
-    );
     my $mitama = $element_fusions{$demon1->name}{$demon2->name};
     return unless $mitama;
     return Demon->lookup("$mitama Mitama");
@@ -136,6 +137,32 @@ multi method fusions_for (ClassName $self: EvolveDemon $demon is coerce) {
 multi method fusions_for (ClassName $self: DeathstoneDemon $demon is coerce) {
     # XXX: fix
     return;
+}
+
+multi method fusions_for (ClassName $self: Element $demon is coerce) {
+    my @demons = Demon->lookup(self_fusion_element => $demon->name);
+    my @found;
+    for my $demon1 (@demons) {
+        for my $demon2 (grep { $demon1->type eq $_->type } @demons) {
+            next if $demon1->name eq $demon2->name;
+            next if $demon2->level < $demon1->level;
+            push @found, [$demon1, $demon2];
+        }
+    }
+    return @found;
+}
+
+multi method fusions_for (ClassName $self: Mitama $demon is coerce) {
+    my @found;
+    for my $demon1 (keys %element_fusions) {
+        for my $demon2 (keys %{ $element_fusions{$demon1} }) {
+            next unless $demon->name eq "$element_fusions{$demon1}{$demon2} Mitama";
+            my ($found1, $found2) = (Demon->lookup($demon1), Demon->lookup($demon2));
+            next if $found2->level < $found1->level;
+            push @found, [$found1, $found2];
+        }
+    }
+    return @found;
 }
 
 __PACKAGE__->meta->make_immutable;
