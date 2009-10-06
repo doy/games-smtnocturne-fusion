@@ -47,8 +47,8 @@ my %element_fusions = (
     },
 );
 
-multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
-                                     SMTDemon $demon2 is coerce) {
+multi method fuse (ClassName $class: SMTDemon $demon1 does coerce,
+                                     SMTDemon $demon2 does coerce) {
     if ($demon1->type eq $demon2->type) {
         # aw, this can't be a separate multimethod
         my $element = $demon1->self_fusion_element;
@@ -63,8 +63,8 @@ multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
     }
 }
 
-multi method fuse (ClassName $class: Element $demon1 is coerce,
-                                     SMTDemon $demon2 is coerce) {
+multi method fuse (ClassName $class: Element $demon1 does coerce,
+                                     SMTDemon $demon2 does coerce) {
     my $direction = $demon2->elemental_fusion_direction($demon1->name);
     return unless defined $direction;
 
@@ -76,44 +76,44 @@ multi method fuse (ClassName $class: Element $demon1 is coerce,
     }
 }
 
-multi method fuse (ClassName $class: Mitama $demon1 is coerce,
-                                     SMTDemon $demon2 is coerce) {
+multi method fuse (ClassName $class: Mitama $demon1 does coerce,
+                                     SMTDemon $demon2 does coerce) {
     return $demon2;
 }
 
-multi method fuse (ClassName $class: Mitama $demon1 is coerce,
-                                     Element $demon2 is coerce) {
+multi method fuse (ClassName $class: Mitama $demon1 does coerce,
+                                     Element $demon2 does coerce) {
     return $demon2;
 }
 
-multi method fuse (ClassName $class: Element $demon1 is coerce,
-                                     Mitama $demon2 is coerce) {
+multi method fuse (ClassName $class: Element $demon1 does coerce,
+                                     Mitama $demon2 does coerce) {
     return $class->fuse($demon2, $demon1);
 }
 
-multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
-                                     Element $demon2 is coerce) {
+multi method fuse (ClassName $class: SMTDemon $demon1 does coerce,
+                                     Element $demon2 does coerce) {
     return $class->fuse($demon2, $demon1);
 }
 
-multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
-                                     Mitama $demon2 is coerce) {
+multi method fuse (ClassName $class: SMTDemon $demon1 does coerce,
+                                     Mitama $demon2 does coerce) {
     return $class->fuse($demon2, $demon1);
 }
 
-multi method fuse (ClassName $class: Element $demon1 is coerce,
-                                     Element $demon2 is coerce) {
+multi method fuse (ClassName $class: Element $demon1 does coerce,
+                                     Element $demon2 does coerce) {
     my $mitama = $element_fusions{$demon1->name}{$demon2->name};
     return unless $mitama;
     return Demon->lookup("$mitama Mitama");
 }
 
-multi method fuse (ClassName $class: Mitama $demon1 is coerce,
-                                     Mitama $demon2 is coerce) {
+multi method fuse (ClassName $class: Mitama $demon1 does coerce,
+                                     Mitama $demon2 does coerce) {
     return;
 }
 
-multi method fusions_for (ClassName $class: SMTDemon $demon is coerce) {
+multi method fusions_for (ClassName $class: SMTDemon $demon does coerce) {
     my $type = $demon->type;
     my @type_combos;
     for my $type1 (keys %{ $class->_type_chart }) {
@@ -141,16 +141,16 @@ multi method fusions_for (ClassName $class: SMTDemon $demon is coerce) {
     return @found;
 }
 
-multi method fusions_for (ClassName $class: SpecialDemon $demon is coerce) {
+multi method fusions_for (ClassName $class: SpecialDemon $demon does coerce) {
     # XXX: fix
     return;
 }
 
-multi method fusions_for (ClassName $class: EvolveDemon $demon is coerce) {
+multi method fusions_for (ClassName $class: EvolveDemon $demon does coerce) {
     return;
 }
 
-multi method fusions_for (ClassName $class: DeathstoneDemon $demon is coerce) {
+multi method fusions_for (ClassName $class: DeathstoneDemon $demon does coerce) {
     my @demons = Demon->lookup(type => $demon->required_target_type);
     return map { [@$_, Games::SMTNocturne::Fusion::Deathstone->new] }
            map { $class->fusions_for($_) }
