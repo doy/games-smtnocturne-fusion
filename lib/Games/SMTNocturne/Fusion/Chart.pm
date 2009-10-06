@@ -1,6 +1,7 @@
 package Games::SMTNocturne::Fusion::Chart;
 use Moose;
 use MooseX::ClassAttribute;
+use MooseX::MultiMethods;
 use YAML::Any qw(Load);
 use Games::SMTNocturne::Fusion::Types qw(DemonType SMTDemon);
 use MooseX::Types::Moose qw(HashRef Maybe);
@@ -18,9 +19,8 @@ class_has _type_chart => (
     },
 );
 
-sub fuse {
-    my $self = shift;
-    my ($demon1, $demon2) = map { to_SMTDemon($_) } @_;
+multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
+                                    SMTDemon $demon2 is coerce) {
     my $type = $self->_type_chart->{$demon1->type}{$demon2->type};
     my $level = ($demon1->level + $demon2->level) / 2;
     my @possible = Demon->lookup(
@@ -30,10 +30,7 @@ sub fuse {
     return $possible[0];
 }
 
-sub fusions_for {
-    my $self = shift;
-    my ($demon) = map { to_SMTDemon($_) } @_;
-
+method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
     my $type = $demon->type;
     my @type_combos;
     for my $type1 (keys %{ $self->_type_chart }) {
