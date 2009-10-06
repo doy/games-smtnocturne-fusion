@@ -1,18 +1,21 @@
 package Games::SMTNocturne::Fusion::Types;
-use strict;
-use warnings;
-use Moose::Util::TypeConstraints;
+use MooseX::Types -declare => [qw(DemonType FusionType SMTDemon DemonList)];
+use MooseX::Types::Moose qw(ArrayRef Str);
 
-enum 'Games::SMTNocturne::Fusion::DemonType' =>
+# XXX: make each demon type a subtype of Demon
+my @demon_types =
     qw(Deity Megami Fury Lady Kishin Holy Element Mitama Yoma Fairy Divine
        Fallen Snake Beast Jirae Brute Femme Vile Tyrant Night Wilder Haunt
        Foul Seraph Wargod Genma Dragon Avatar Avian Raptor Entity Fiend);
-enum 'Games::SMTNocturne::Fusion::FusionType' =>
-    qw(deathstone evolve normal special);
-subtype 'Games::SMTNocturne::Fusion::DemonList',
-    as 'ArrayRef[Games::SMTNocturne::Fusion::Demon]';
-coerce 'Games::SMTNocturne::Fusion::DemonList',
-    from 'ArrayRef[Str]',
-    via { [map { Games::SMTNocturne::Fusion::Demon->lookup($_) } @$_] };
+
+enum DemonType, @demon_types;
+enum FusionType, qw(deathstone evolve normal special);
+
+class_type SMTDemon, { class => 'Games::SMTNocturne::Fusion::Demon' };
+coerce SMTDemon, from Str,
+    via { Games::SMTNocturne::Fusion::Demon->lookup($_) };
+subtype DemonList, as ArrayRef[SMTDemon];
+coerce DemonList, from ArrayRef[Str],
+    via { [map { to_SMTDemon($_) } @$_] };
 
 1;

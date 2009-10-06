@@ -2,12 +2,13 @@ package Games::SMTNocturne::Fusion::Chart;
 use Moose;
 use MooseX::ClassAttribute;
 use YAML::Any qw(Load);
-use Games::SMTNocturne::Fusion::Types;
+use Games::SMTNocturne::Fusion::Types qw(DemonType SMTDemon);
+use MooseX::Types::Moose qw(HashRef Maybe);
 use constant Demon => 'Games::SMTNocturne::Fusion::Demon';
 
 class_has _type_chart => (
     is      => 'ro',
-    isa     => 'HashRef[HashRef[Maybe[Games::SMTNocturne::Fusion::DemonType]]]',
+    isa     => HashRef[HashRef[Maybe[DemonType]]],
     lazy    => 1,
     default => sub {
         local $/ = undef;
@@ -19,9 +20,7 @@ class_has _type_chart => (
 
 sub fuse {
     my $self = shift;
-    my ($demon1, $demon2) = @_;
-    $demon1 = Demon->lookup($demon1) unless blessed($demon1);
-    $demon2 = Demon->lookup($demon2) unless blessed($demon2);
+    my ($demon1, $demon2) = map { to_SMTDemon($_) } @_;
     my $type = $self->_type_chart->{$demon1->type}{$demon2->type};
     my $level = ($demon1->level + $demon2->level) / 2;
     my @possible = Demon->lookup(
@@ -33,8 +32,7 @@ sub fuse {
 
 sub fusions_for {
     my $self = shift;
-    my ($demon) = @_;
-    $demon = Demon->lookup($demon) unless blessed($demon);
+    my ($demon) = map { to_SMTDemon($_) } @_;
 
     my $type = $demon->type;
     my @type_combos;

@@ -1,8 +1,9 @@
 package Games::SMTNocturne::Fusion::Demon;
 use Moose;
 use MooseX::ClassAttribute;
+use MooseX::Types::Moose qw(ArrayRef HashRef Int Str);
 use YAML::Any qw(Load);
-use Games::SMTNocturne::Fusion::Types;
+use Games::SMTNocturne::Fusion::Types qw(DemonType FusionType SMTDemon);
 use overload
     '""' => sub {
         my $self = shift;
@@ -14,7 +15,7 @@ with 'MooseX::Traits',
 
 class_has _list => (
     is      => 'ro',
-    isa     => 'ArrayRef[HashRef]',
+    isa     => ArrayRef[HashRef],
     lazy    => 1,
     default => sub {
         local $/ = undef;
@@ -26,7 +27,7 @@ class_has _list => (
 
 class_has list => (
     is => 'ro',
-    isa => 'ArrayRef[Games::SMTNocturne::Fusion::Demon]',
+    isa => ArrayRef[SMTDemon],
     lazy => 1,
     default => sub {
         my $meta = shift;
@@ -43,25 +44,25 @@ class_has list => (
 
 has name => (
     is       => 'ro',
-    isa      => 'Str',
+    isa      => Str,
     required => 1,
 );
 
 has level => (
     is       => 'ro',
-    isa      => 'Int',
+    isa      => Int,
     required => 1,
 );
 
 has type => (
     is       => 'ro',
-    isa      => 'Games::SMTNocturne::Fusion::DemonType',
+    isa      => DemonType,
     required => 1,
 );
 
 has fusion_type => (
     is       => 'ro',
-    isa      => 'Games::SMTNocturne::Fusion::FusionType',
+    isa      => FusionType,
     required => 1,
 );
 
