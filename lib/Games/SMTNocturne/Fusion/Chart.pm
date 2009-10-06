@@ -47,16 +47,16 @@ my %element_fusions = (
     },
 );
 
-multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
-                                    SMTDemon $demon2 is coerce) {
+multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
+                                     SMTDemon $demon2 is coerce) {
     return Demon->next_demon_above_level(
-        $self->_type_chart->{$demon1->type}{$demon2->type},
+        $class->_type_chart->{$demon1->type}{$demon2->type},
         ($demon1->level + $demon2->level) / 2,
     );
 }
 
-multi method fuse (ClassName $self: Element $demon1 is coerce,
-                                    SMTDemon $demon2 is coerce) {
+multi method fuse (ClassName $class: Element $demon1 is coerce,
+                                     SMTDemon $demon2 is coerce) {
     my $direction = $demon2->elemental_fusion_direction($demon1->name);
     return unless defined $direction;
 
@@ -68,40 +68,40 @@ multi method fuse (ClassName $self: Element $demon1 is coerce,
     }
 }
 
-multi method fuse (ClassName $self: Mitama $demon1 is coerce,
-                                    SMTDemon $demon2 is coerce) {
+multi method fuse (ClassName $class: Mitama $demon1 is coerce,
+                                     SMTDemon $demon2 is coerce) {
     return $demon2;
 }
 
-multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
-                                    Element $demon2 is coerce) {
-    return $self->fuse($demon2, $demon1);
+multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
+                                     Element $demon2 is coerce) {
+    return $class->fuse($demon2, $demon1);
 }
 
-multi method fuse (ClassName $self: SMTDemon $demon1 is coerce,
-                                    Mitama $demon2 is coerce) {
-    return $self->fuse($demon2, $demon1);
+multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
+                                     Mitama $demon2 is coerce) {
+    return $class->fuse($demon2, $demon1);
 }
 
-multi method fuse (ClassName $self: Element $demon1 is coerce,
-                                    Element $demon2 is coerce) {
+multi method fuse (ClassName $class: Element $demon1 is coerce,
+                                     Element $demon2 is coerce) {
     my $mitama = $element_fusions{$demon1->name}{$demon2->name};
     return unless $mitama;
     return Demon->lookup("$mitama Mitama");
 }
 
-multi method fuse (ClassName $self: Mitama $demon1 is coerce,
-                                    Mitama $demon2 is coerce) {
+multi method fuse (ClassName $class: Mitama $demon1 is coerce,
+                                     Mitama $demon2 is coerce) {
     return;
 }
 
-multi method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
+multi method fusions_for (ClassName $class: SMTDemon $demon is coerce) {
     my $type = $demon->type;
     my @type_combos;
-    for my $type1 (keys %{ $self->_type_chart }) {
+    for my $type1 (keys %{ $class->_type_chart }) {
         for my $type2 (grep { defined }
-                            keys %{ $self->_type_chart->{$type1} }) {
-            my $fusion_type = $self->_type_chart->{$type1}{$type2};
+                            keys %{ $class->_type_chart->{$type1} }) {
+            my $fusion_type = $class->_type_chart->{$type1}{$type2};
             push @type_combos, [$type1, $type2]
                 if defined $fusion_type && $type eq $fusion_type;
         }
@@ -113,7 +113,7 @@ multi method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
         my @type2_demons = Demon->lookup(type => $combo->[1]);
         for my $demon1 (@type1_demons) {
             for my $demon2 (@type2_demons) {
-                my $fusion = $self->fuse($demon1, $demon2);
+                my $fusion = $class->fuse($demon1, $demon2);
                 push @found, [$demon1, $demon2]
                     if defined $fusion && $fusion->name eq $demon->name;
             }
@@ -123,21 +123,21 @@ multi method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
     return @found;
 }
 
-multi method fusions_for (ClassName $self: SpecialDemon $demon is coerce) {
+multi method fusions_for (ClassName $class: SpecialDemon $demon is coerce) {
     # XXX: fix
     return;
 }
 
-multi method fusions_for (ClassName $self: EvolveDemon $demon is coerce) {
+multi method fusions_for (ClassName $class: EvolveDemon $demon is coerce) {
     return;
 }
 
-multi method fusions_for (ClassName $self: DeathstoneDemon $demon is coerce) {
+multi method fusions_for (ClassName $class: DeathstoneDemon $demon is coerce) {
     # XXX: fix
     return;
 }
 
-multi method fusions_for (ClassName $self: Element $demon is coerce) {
+multi method fusions_for (ClassName $class: Element $demon is coerce) {
     my @demons = Demon->lookup(self_fusion_element => $demon->name);
     my @found;
     for my $demon1 (@demons) {
@@ -149,7 +149,7 @@ multi method fusions_for (ClassName $self: Element $demon is coerce) {
     return @found;
 }
 
-multi method fusions_for (ClassName $self: Mitama $demon is coerce) {
+multi method fusions_for (ClassName $class: Mitama $demon is coerce) {
     my @found;
     for my $demon1 (keys %element_fusions) {
         for my $demon2 (keys %{ $element_fusions{$demon1} }) {
@@ -162,7 +162,7 @@ multi method fusions_for (ClassName $self: Mitama $demon is coerce) {
 }
 
 mangle_return fusions_for => sub {
-    my $self = shift;
+    my $class = shift;
     @_ = grep { $_->[0]->level <= $_->[1]->level } @_;
     return @_;
 };
