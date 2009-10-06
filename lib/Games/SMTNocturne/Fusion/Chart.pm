@@ -88,6 +88,7 @@ method fusions_for (ClassName $self: SMTDemon $demon is coerce) {
         my @type2_demons = Demon->lookup(type => $combo->[1]);
         for my $demon1 (@type1_demons) {
             for my $demon2 (@type2_demons) {
+                next if $demon2->level < $demon1->level;
                 my $fusion = $self->fuse($demon1, $demon2);
                 push @found, [$demon1, $demon2]
                     if defined $fusion && $fusion->name eq $demon->name;
