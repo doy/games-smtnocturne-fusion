@@ -49,10 +49,18 @@ my %element_fusions = (
 
 multi method fuse (ClassName $class: SMTDemon $demon1 is coerce,
                                      SMTDemon $demon2 is coerce) {
-    return Demon->next_demon_above_level(
-        $class->_type_chart->{$demon1->type}{$demon2->type},
-        ($demon1->level + $demon2->level) / 2,
-    );
+    if ($demon1->type eq $demon2->type) {
+        # aw, this can't be a separate multimethod
+        my $element = $demon1->self_fusion_element;
+        return unless $element;
+        return Demon->lookup($element);
+    }
+    else {
+        return Demon->next_demon_above_level(
+            $class->_type_chart->{$demon1->type}{$demon2->type},
+            ($demon1->level + $demon2->level) / 2,
+        );
+    }
 }
 
 multi method fuse (ClassName $class: Element $demon1 is coerce,
