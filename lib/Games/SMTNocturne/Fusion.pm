@@ -3,10 +3,13 @@ use Games::SMTNocturne::Fusion::Demon;
 use Games::SMTNocturne::Fusion::Chart;
 use Sub::Exporter -setup => {
     exports => [
-        qw(fuse fusions_for lookup_demon),
+        qw(fuse fusions_for lookup_demon
+           pretty_print_fusion pretty_print_fusions pretty_fusions_for),
     ],
     groups => {
         default => [qw(fuse fusions_for lookup_demon)],
+        print   => [qw(pretty_print_fusion pretty_print_fusions
+                       pretty_fusions_for)],
     },
 };
 
@@ -32,6 +35,22 @@ sub fusions_for {
 
 sub lookup_demon {
     return Games::SMTNocturne::Fusion::Demon->lookup(@_);
+}
+
+sub pretty_print_fusion {
+    my ($fusion) = @_;
+    my ($demon1, $demon2, $sacrifice, $time) = @$fusion;
+    return "Fuse $demon1 with $demon2"
+         . ($sacrifice ? ", while sacrificing $sacrifice" : "")
+         . ($time      ? ", at $time"                     : "");
+}
+
+sub pretty_print_fusions {
+    return join "\n", map { pretty_print_fusion($_) } @_;
+}
+
+sub pretty_fusions_for {
+    return pretty_print_fusions(fusions_for(@_));
 }
 
 =head1 BUGS
